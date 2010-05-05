@@ -30,6 +30,18 @@ class PersistentManager extends TObjectStatic implements IPersistence {
 		return true;
 	}
 	
+	public function getUrlList() {
+		$arr = array();
+		
+		$query = "SELECT idUrlShorten, bitlyHash, originalUrl FROM ".$this->table."";
+		$r = mysql_query($query, $this->conn);
+		while($row = mysql_fetch_assoc($r)) {
+			$arr[] = $row;
+		}
+		return $arr;
+	}
+	
+	
 	public function saveLink($url, $bitlyHash, $hash) {
 		$url = mysql_escape_string($url);
 		$hash = mysql_escape_string($hash);
@@ -37,6 +49,8 @@ class PersistentManager extends TObjectStatic implements IPersistence {
 		$query = "INSERT INTO ".$this->table." (idUrlShorten, bitlyHash, originalUrl) VALUES ('$hash','$bitlyHash','$url')";
 		$r = mysql_query($query, $this->conn);
 	}
+	
+	
 	
 }
 ?>

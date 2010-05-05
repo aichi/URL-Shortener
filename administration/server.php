@@ -7,16 +7,17 @@ require_once './lib/Application.php';
 require_once './lib/ILogin.php';
 require_once './lib/IPersistence.php';
 
+session_start();
 
 $app = Application::getInstance($CONFIG);
 
 if (!isset($_REQUEST['page'])) {
-	$_REQUEST['page'] = 'index';
+	$_REQUEST['page'] = 'urlList';
 }
 
-if ($app->isUserLogged() && in_array($_REQUEST['page'], $app->allowedPages() ) ) {
-	$app->{'render'.$_REQUEST['page']}();
-} else {
-	$app->renderLogin();
+if ($app->isUserLogged() && in_array(strtolower($_REQUEST['page']), $app->allowedPages() ) ) {
+	$app->{'web'.$_REQUEST['page']}();
+} else { 
+	$app->webLogin();
 }
 ?>

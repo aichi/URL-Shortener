@@ -68,8 +68,8 @@ class Application extends TObjectStatic  {
 		$methods = get_class_methods($this);
 		$output = array();
 		foreach ($methods as $method) {
-			if (substr($method,0,6) == 'render') {
-				$output[] = strtolower(substr($method, 6));
+			if (substr($method,0,3) == 'web') {
+				$output[] = strtolower(substr($method, 3));
 			}
 		}
 		
@@ -84,27 +84,32 @@ class Application extends TObjectStatic  {
 	}
 	
 	/**
-	 * render main page
-	 *
+	 * User loggin method
 	 */
-	public function renderIndex() {
-		/*$ab = new AddressBook();
-		if (isset($_REQUEST['page'])){
-			$page = (int)$_REQUEST['page'];
-			$page = $page < 1 ? 1 : $page;
+	public function webLogin() {
+		if ($this->loginManager->login($_POST['username'], $_POST['password'])) {
+			header("HTTP/1.0 200 OK");
 		} else {
-			$page = 1;
+			header("HTTP/1.0 401 Unauthorized");
 		}
-		$ab->init($page,10);
-		
-				
-		$this->smarty->assign('addressBook', $ab);
-		$this->smarty->display('index.stpl');*/
-		
-		echo "<a href='?page=addlink'>Nová adresa</a><br />";
 	}
 	
-	public function renderAddLink() {
+	/**
+	 * Render URL list
+	 */
+	public function webUrlList() {
+		if ($this->isUserLogged()) {
+			$result = $this->pm->getUrlList();
+			echo json_encode($result);
+		} else {
+			header("HTTP/1.0 401 Unauthorized");
+		}
+	}
+	
+	
+	
+	
+	public function webAddLink() {
 		echo "<form method='post' action='?page=savelink'>";
 		
 		echo "URL: <input type='text' name='url' value='' />";
@@ -114,7 +119,7 @@ class Application extends TObjectStatic  {
 		echo "</form>";
 	}
 	
-	public function renderSaveLink() {
+	public function webSaveLink() {
 		$conf = $this->config['bitly'];
 		
 		$u = urlencode($_REQUEST['url']); 
