@@ -1,0 +1,4 @@
+@CHARSET "UTF-8";
+
+.hidden		{ display : none; }
+.error		{ color: red; }
