@@ -12,6 +12,8 @@ UrlShortener.prototype.$constructor = function() {
 	//dom elements cache
 	this.dom = {};
 	
+	this.showedBox = null;
+	
 	this.init();
 };
 
@@ -20,6 +22,8 @@ UrlShortener.prototype.$constructor = function() {
  */
 UrlShortener.prototype.$destructor = function() {
 	this.ec.forEach(JAK.Events.removeListener, JAK.Events);
+	
+	this.showedBox = null;
 	
 	for (var p in this.dom) {
 		this.dom[p] = null;
@@ -40,8 +44,8 @@ UrlShortener.prototype.init = function() {
 	
 	this._hide(this.dom.menuBox);
 	
-	//this.ec.push(JAK.Events.addListener(this.dom.menuItemUrlList, 'click', this, 'showUrlListClick'));
-	//this.ec.push(JAK.Events.addListener(this.dom.menuItemNewUrl, 'click', this, 'showNewItemFormClick'));
+	this.ec.push(JAK.Events.addListener(this.dom.menuItemUrlList, 'click', this, 'showUrlListClick'));
+	this.ec.push(JAK.Events.addListener(this.dom.menuItemNewUrl, 'click', this, 'newItemFormClick'));
 	//this.ec.push(JAK.Events.addListener(this.dom.menuItemLogout, 'click', this, 'logoutClick'));
 	
 	
@@ -60,16 +64,46 @@ UrlShortener.prototype.init = function() {
 	
 	this.ec.push(JAK.Events.addListener(this.dom.loginButton, 'click', this, 'loginClick'));
 	
+	this.showedBox = this.dom.loginBox;
+	
 	
 	//throbber
 	this.dom.throbberBox = JAK.gel('throbber-box');
 	this._hide(this.dom.throbberBox);
 	
+	
 	//url-list
 	this.dom.urlListBox = JAK.gel('url-list-box');
 	this.dom.urlListBody = JAK.gel('url-list-body');
-	
 	this._hide(this.dom.urlListBox);
+	
+	
+	//new-url
+	this.dom.newUrlBox = JAK.gel('new-url-box');
+	this.dom.url = JAK.gel('url');
+	this.dom.hash = JAK.gel('hash');
+	this.dom.urlError = JAK.gel('url-error');
+	this.dom.hashError = JAK.gel('hash-error');
+	this.dom.hashUniqueError = JAK.gel('hash-unique-error');
+	this.dom.newUrlGlobalError = JAK.gel('new-url-global-error');
+	this.dom.newUrlButton = JAK.gel('new-url-button');
+	
+	this._hide(this.dom.newUrlBox);
+	this._hide(this.dom.urlError);
+	this._hide(this.dom.hashError);
+	this._hide(this.dom.hashUniqueError);
+	
+	this.ec.push(JAK.Events.addListener(this.dom.newUrlButton, 'click', this, 'newUrlClick'));
+	this.ec.push(JAK.Events.addListener(this.dom.hash, 'change', this, 'checkHash'));
+	this.ec.push(JAK.Events.addListener(this.dom.hash, 'keyup', this, 'checkHash'));
+	
+	//new-url-result
+	this.dom.newUrlResultBox = JAK.gel('new-url-result-box');
+	this.dom.newUrl = JAK.gel('new-url');
+	this.dom.newShortenUrl = JAK.gel('new-shorten-url');
+	this.dom.newShortenUrlInput = JAK.gel('new-shorten-url-input');
+	
+	this._hide(this.dom.newUrlResultBox);
 };
 
 /**
@@ -87,6 +121,8 @@ UrlShortener.prototype._show = function(elm) {
 UrlShortener.prototype._hide = function(elm) {
 	elm.style.display = 'none';
 };
+
+/*----------------------------LOGIN----------------------------*/
 
 /**
  * login method called clicking login-button submit
@@ -125,8 +161,9 @@ UrlShortener.prototype.loginClick = function(e, elm) {
  * @param status
  */
 UrlShortener.prototype._loginCallback = function(txt, status) {
-	if (status == 200) {
-		this._hide(this.dom.loginBox);
+	if (status == 200) {	
+	
+		this._hide(this.showedBox);
 		this._show(this.dom.menuBox);
 		
 		this.showUrlList();
@@ -138,9 +175,17 @@ UrlShortener.prototype._loginCallback = function(txt, status) {
 		this._show(this.dom.loginError);
 	}
 };
-	
+
+/*--------------------------Show URLs-------------------------*/
+
+UrlShortener.prototype.showUrlListClick = function(e, elm){
+	JAK.Events.cancelDef(e);
+	this.showUrlList();
+};
+
+
 /**
- * render table with URL list
+ * render table with URL list - preparation
  */
 UrlShortener.prototype.showUrlList = function() {
 	this._show(this.dom.throbberBox);
@@ -150,18 +195,26 @@ UrlShortener.prototype.showUrlList = function() {
 	rq.send('server.php?page=urlList');
 };
 
+/**
+ * callback from server request data 
+ */
 UrlShortener.prototype._showUrlListCallback = function(txt, status) {
 	this._hide(this.dom.throbberBox);
 	this._show(this.dom.urlListBox);
+	this.showedBox = this.dom.urlListBox;
+	
 	if (status == 200) {
 		eval('var data = ' + txt);
 		this._renderUrlList(data);
 	} else {
+		//@todo logout
 		console.log('logout');
 	}
 };
 
-
+/**
+ * data rendering to table
+ */
 UrlShortener.prototype._renderUrlList = function(urls) {
 	for (var i = 0; i < urls.length; i++) {
 		var row = JAK.cel('tr');
@@ -171,5 +224,120 @@ UrlShortener.prototype._renderUrlList = function(urls) {
 		var link = JAK.mel('a', {href: '#' + urls[i].idUrlShorten, innerHTML: 'Delete' });
 	
 		JAK.DOM.append([this.dom.urlListBody, row],[row, td1, td2], [td2, link]);
+	}
+};
+
+/*--------------------------New URL--------------------------*/
+/**
+ * action after menu item click
+ */
+UrlShortener.prototype.newItemFormClick = function(e, elm) {
+	JAK.Events.cancelDef(e);
+	this.newItem();
+};
+
+/**
+ * show form, where you can add new url
+ */
+UrlShortener.prototype.newItem = function() {
+	this._hide(this.showedBox);
+	this._show(this.dom.newUrlBox);
+	this.showedBox = this.dom.newUrlBox;
+};
+
+/**
+ * action on save button
+ */
+UrlShortener.prototype.newUrlClick = function(e, elm) {
+	var result = true;
+	
+	this._hide(this.dom.urlError);
+	this._hide(this.dom.hashError);
+	this._hide(this.dom.hashUniqueError);
+	this._hide(this.dom.newUrlGlobalError);
+	
+	if (this.dom.url.value.length == 0) {
+		result = false;
+		this._show(this.dom.urlError);
+	}
+	
+	if (!this._isUrl(this.dom.url.value)) {
+		result = false;
+		this._show(this.dom.urlError);
+	}
+	
+	if (!this._isHash(this.dom.hash)) {
+		result = false;
+		this._show(this.dom.hashError);
+	}
+	
+	if (result) {
+		this._show(this.dom.throbberBox);
+		
+		var rq = new JAK.Request(JAK.Request.TEXT, {method: 'post'});
+		rq.setCallback(this, '_showUrlListCallback');
+		rq.send('server.php?page=newUrl', {url: this.dom.url.value, hash: this.dom.hash.value});
+	}
+};
+
+UrlShortener.prototype._showUrlListCallback = function(txt, status) {
+	this._hide(this.dom.throbberBox);
+	if(status == 200) {
+		eval('var data = ' + txt);
+		//url saved, show result
+		if (data.status == 'ok') {
+			this._hide(this.showedBox);
+			this._show(this.dom.newUrlResultBox);
+			this.showedBox = this.dom.newUrlResultBox;
+			
+			
+			this.dom.newUrl.href = data.data.url;
+			this.dom.newUrl.innerHTML = data.data.url;
+			this.dom.newShortenUrl.href = data.data.shorten_url;
+			this.dom.newShortenUrl.innerHTML = data.data.shorten_url;
+			this.dom.newShortenUrlInput.value = data.data.shorten_url;
+		//url not saved, show errors
+		} else {
+			
+		}
+	} else {
+		//@todo logout
+		console.log('logout');
+	}
+};
+
+/**
+ * test if string is valid URL
+ */
+UrlShortener.prototype._isUrl = function(s) {
+	var regexp = /(ftp|ftps|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+	return regexp.test(s);
+};
+
+/**
+ * test if string is valid Hash
+ */
+UrlShortener.prototype._isHash = function(s) {
+	var regexp = /[a-zA-z0-9_\-]*/;
+	return regexp.test(s);
+};
+
+/**
+ * online validate hash uniquicity 
+ */
+UrlShortener.prototype.checkHash = function(e, elm) {
+	var rq = new JAK.Request(JAK.Request.TEXT);
+	rq.setCallback(this, '_checkHashCallback');
+	rq.send('server.php?page=checkHash&hash=' + elm.value);
+};
+
+UrlShortener.prototype._checkHashCallback = function(txt, status) {
+	if (status == 200) {
+		eval('var data = ' + txt);
+		if (data && data.unique) {
+			this._hide(this.dom.hashUniqueError);
+		} else {
+			this._show(this.dom.hashUniqueError);
+		}
 	}
 };

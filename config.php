@@ -13,7 +13,6 @@ $CONFIG['development'] = array(
 	'bitly' => array(
 		'login' => 'test',
 		'apikey' => 'R_xxx'
-	)
 );
 $CONFIG['production'] = array(
 	'persistentManager'	=> "PersistentManager",
@@ -28,5 +27,8 @@ $CONFIG['production'] = array(
 	'bitly' => array(
 		'login' => 'test',
 		'apikey' => 'R_xxx'
-	)
+	),
+	'shortenUrl' => 'http://example.com/'
+	),
+	'shortenUrl' => 'http://example.com/'
 );

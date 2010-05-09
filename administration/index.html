@@ -36,13 +36,30 @@
 		<table>
 			<thead>
 				<tr>
-					<td>URL</td>
-					<td>Actions</td>
+					<th>URL</th>
+					<th>Actions</th>
 				</tr>
 			</thead>
 			<tbody id="url-list-body">
 			</tbody>
 		</table>
+	</div>
+	
+	<div id="new-url-box">
+		<fieldset>
+			<p><span>URL:</span><input type="text" id="url" /></p>
+			<p id="url-error" class="error">URL is not valid. Do not forget, that URL has to start with protocol, e.g. http://</p>
+			<p><span>Own hash:</span><input type="text" id="hash" /> <span class="info">If empty, hash will be generated.</span></p>
+			<p id="hash-error" class="error">Hash has to contain only letters, numbers and -_ signs.</p>
+			<p id="hash-unique-error" class="error">Hash has to be unique.</p>
+			<p><input type="submit" value="Save" id="new-url-button" /></p>
+			<p id="new-url-global-error" class="error"></p>
+		</fieldset>
+	</div>
+	
+	<div id="new-url-result-box">
+		<p>Your URL: <a id="new-url" href="#"></a> had been shorten to:	<a id="new-shorten-url" href="#"></a>.</p>
+		<p>You should easy copy it from this input: <input id="new-shorten-url-input" type="text" /></p>
 	</div>
 	
 	<div id="throbber-box">

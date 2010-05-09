@@ -106,6 +106,102 @@ class Application extends TObjectStatic  {
 		}
 	}
 	
+	/**
+	 * check if HASH is unique
+	 */
+	public function webCheckHash() {
+		if ($this->isUserLogged()) {
+			$result = $this->pm->checkUniqueHash($_REQUEST['hash']);
+			$r = new stdClass();
+			$r->unique = $result;
+			echo json_encode($r);
+		} else {
+			header("HTTP/1.0 401 Unauthorized");
+		}
+	}
+	
+	public function webNewUrl() {
+		if ($this->isUserLogged()) {
+			$r = new stdClass();
+			$r->status = 'ok';
+			$errors = array(); 
+			
+			
+			$url = $_POST['url'];
+			$hash = $_POST['hash'];
+			
+			if (empty($url)) {
+				$r->status = 'error';
+				$errors[] = 'emptyurl'; 
+			}
+			
+			$regexp = "/^(ftp|ftps|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/";
+			if (!preg_match($regexp, $url)) {
+				$r->status = 'error';
+				$errors[] = 'invalidurl';
+			}
+			
+			if (!empty($hash) && !$this->pm->checkUniqueHash($hash)) {
+				$r->status = 'error';
+				$errors[] = 'nonuniquehash';
+			}
+			
+			if ($r->status == 'error') {
+				$r->errors = $errors;
+			} else {
+				$conf = $this->config['bitly'];
+		
+				$u = urlencode($_REQUEST['url']); 
+				$urlli = "http://api.bit.ly/v3/shorten?login=".$conf['login']."&apiKey=".$conf['apikey']."&uri=$u&format=json";
+				
+				$ch = curl_init();
+				curl_setopt($ch, CURLOPT_HEADER, 0);
+				curl_setopt($ch, CURLOPT_URL, $urlli);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				$response = curl_exec($ch); 
+				curl_close($ch);
+												
+				//$response = file_get_contents($urlli);
+				
+				$data = json_decode($response);
+				
+				if ($data !== false && $data->status_code == 200) {
+					$bitly = $data->data->hash;
+					//ukladam novou url
+					if ($data->data->new_hash == 1) {
+						$result = $this->pm->saveUrl($url, $bitly, $hash);
+						if ($result == false) {
+							$r->status = 'error';
+							$r->errorText = 'Error when trying save data. Please try again.';
+						} else {
+							$r->data = $result;
+							$r->data['shorten_url'] = $this->config['shortenUrl'] . $result['hash'];
+						}
+					//ziskam pro starou url data
+					} else {
+						$result = $this->pm->getUrlByBitly($bitly);
+						if ($result == false) {
+							$r->status = 'error';
+							$r->errorText = 'Error when trying load data. Please try again.';
+						} else {
+							$r->data = $result;
+							$r->data['shorten_url'] = $this->config['shortenUrl'] . $result['hash'];
+						}
+					}
+				} else {
+					$r->status == 'error';
+					$r->errorText = $data->status_txt;
+				}
+			}
+			
+						
+			echo json_encode($r);
+			exit;
+		} else {
+			header("HTTP/1.0 401 Unauthorized");
+		}
+	}
+	
 	
 	
 	
