@@ -102,6 +102,7 @@ UrlShortener.prototype.init = function() {
 	this.dom.newUrl = JAK.gel('new-url');
 	this.dom.newShortenUrl = JAK.gel('new-shorten-url');
 	this.dom.newShortenUrlInput = JAK.gel('new-shorten-url-input');
+    this.dom.qrCode = JAK.gel('qr-code');
 	
 	this._hide(this.dom.newUrlResultBox);
 };
@@ -275,12 +276,12 @@ UrlShortener.prototype.newUrlClick = function(e, elm) {
 		this._show(this.dom.throbberBox);
 		
 		var rq = new JAK.Request(JAK.Request.TEXT, {method: 'post'});
-		rq.setCallback(this, '_showUrlListCallback');
+		rq.setCallback(this, '_newUrlListCallback');
 		rq.send('server.php?page=newUrl', {url: this.dom.url.value, hash: this.dom.hash.value});
 	}
 };
 
-UrlShortener.prototype._showUrlListCallback = function(txt, status) {
+UrlShortener.prototype._newUrlListCallback = function(txt, status) {
 	this._hide(this.dom.throbberBox);
 	if(status == 200) {
 		eval('var data = ' + txt);
@@ -296,6 +297,7 @@ UrlShortener.prototype._showUrlListCallback = function(txt, status) {
 			this.dom.newShortenUrl.href = data.data.shorten_url;
 			this.dom.newShortenUrl.innerHTML = data.data.shorten_url;
 			this.dom.newShortenUrlInput.value = data.data.shorten_url;
+            this.dom.qrCode.src = 'http://qrcode.kaywa.com/img.php?s=6&d=' + encodeURIComponent(data.data.shorten_url);
 		//url not saved, show errors
 		} else {
             if (data.errorText) {
