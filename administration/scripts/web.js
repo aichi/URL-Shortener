@@ -190,6 +190,7 @@ UrlShortener.prototype.showUrlListClick = function(e, elm){
  */
 UrlShortener.prototype.showUrlList = function() {
 	this._show(this.dom.throbberBox);
+    this._hide(this.showedBox);
 	
 	var rq = new JAK.Request(JAK.Request.TEXT);
 	rq.setCallback(this, '_showUrlListCallback');
@@ -217,6 +218,14 @@ UrlShortener.prototype._showUrlListCallback = function(txt, status) {
  * data rendering to table
  */
 UrlShortener.prototype._renderUrlList = function(urls) {
+    //remove all old childnodes
+    if ( this.dom.urlListBody.hasChildNodes() ) {
+        while ( this.dom.urlListBody.childNodes.length >= 1 ){
+            this.dom.urlListBody.removeChild( this.dom.urlListBody.firstChild );
+        }
+    }
+
+    //rendering new childnodes
 	for (var i = 0; i < urls.length; i++) {
 		var row = JAK.cel('tr');
 		var td1 = JAK.mel('td', {innerHTML: urls[i].originalUrl});
@@ -244,6 +253,9 @@ UrlShortener.prototype.newItem = function() {
 	this._hide(this.showedBox);
 	this._show(this.dom.newUrlBox);
 	this.showedBox = this.dom.newUrlBox;
+
+    this.dom.hash.value = '';
+    this.dom.url.value = '';
 };
 
 /**

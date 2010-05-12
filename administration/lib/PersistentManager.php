@@ -59,12 +59,13 @@ class PersistentManager extends TObjectStatic implements IPersistence {
 		$url = mysql_escape_string($url);
 		$hash = mysql_escape_string($hash);
 		$bitlyHash = mysql_escape_string($bitlyHash);
-		
-		$hash = substr(md5(mktime()), 0, 8);
+
+        if (!$hash) {
+            $hash = substr(md5(mktime()), 0, 8);
+        }
 		
 		$query = "INSERT INTO ".$this->table." (idUrlShorten, bitlyHash, originalUrl) VALUES ('$hash','$bitlyHash','$url')";
 		$r = mysql_query($query, $this->conn);
-		mysql_free_result($r);
 		
 		$query = "SELECT idUrlShorten AS hash, originalUrl AS url FROM ".$this->table." WHERE idUrlShorten = '".$hash."'";
 		$r = mysql_query($query, $this->conn);
