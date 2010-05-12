@@ -204,31 +204,6 @@ class Application extends TObjectStatic  {
 		}
 	}
 	
-	
-	
-	
-	public function webAddLink() {
-		echo "<form method='post' action='?page=savelink'>";
 		
-		echo "URL: <input type='text' name='url' value='' />";
-		echo "Náš volitelný hash: <input type='text' name='hash' value='' />";
-		echo "<input type='submit' />";
-		
-		echo "</form>";
-	}
-	
-	public function webSaveLink() {
-		$conf = $this->config['bitly'];
-		
-		$u = urlencode($_REQUEST['url']); 
-		
-		$url = "http://api.bit.ly/v3/shorten?login=".$conf['login']."&apiKey=".$conf['apikey']."&uri=$u&format=json";
-		
-		$response = file_get_contents($url);
-		$data = json_decode($response);
-		$this->pm->saveLink($_REQUEST['url'], $data->data->hash, $_REQUEST['hash'] ? $_REQUEST['hash'] : substr(md5(time()),0,6));
-		
-	}
-	
 }
 ?>
