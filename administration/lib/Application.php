@@ -146,6 +146,12 @@ class Application extends TObjectStatic  {
 				$errors[] = 'nonuniquehash';
 			}
 			
+            $hashregexp = "/[a-zA-z0-9_\-]*/";
+            if (!empty($hash) && !preg_match($hashregexp, $hash)) {
+                $r->status = 'error';
+                $errors[] = 'invalidhash';
+            }
+
 			if ($r->status == 'error') {
 				$r->errors = $errors;
 			} else {
@@ -160,12 +166,10 @@ class Application extends TObjectStatic  {
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 				$response = curl_exec($ch); 
 				curl_close($ch);
-												
-				//$response = file_get_contents($urlli);
-				
+
 				$data = json_decode($response);
-				
-				if ($data !== false && $data->status_code == 200) {
+                
+				if ($data && $data->status_code == 200) {
 					$bitly = $data->data->hash;
 					//ukladam novou url
 					if ($data->data->new_hash == 1) {
@@ -189,14 +193,12 @@ class Application extends TObjectStatic  {
 						}
 					}
 				} else {
-					$r->status == 'error';
+					$r->status = 'error';
 					$r->errorText = $data->status_txt;
 				}
 			}
-			
 						
 			echo json_encode($r);
-			exit;
 		} else {
 			header("HTTP/1.0 401 Unauthorized");
 		}

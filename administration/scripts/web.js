@@ -221,7 +221,7 @@ UrlShortener.prototype._renderUrlList = function(urls) {
 		var td1 = JAK.mel('td', {innerHTML: urls[i].originalUrl});
 		var td2 = JAK.cel('td');
 		
-		var link = JAK.mel('a', {href: '#' + urls[i].idUrlShorten, innerHTML: 'Delete' });
+		var link = JAK.mel('a', {href: '#' + urls[i].idUrlShorten, innerHTML: 'Delete'});
 	
 		JAK.DOM.append([this.dom.urlListBody, row],[row, td1, td2], [td2, link]);
 	}
@@ -298,7 +298,24 @@ UrlShortener.prototype._showUrlListCallback = function(txt, status) {
 			this.dom.newShortenUrlInput.value = data.data.shorten_url;
 		//url not saved, show errors
 		} else {
-			
+            if (data.errorText) {
+                this.dom.newUrlGlobalError.innerHTML = data.errorText;
+                this._show(this.dom.newUrlGlobalError);
+            }
+            if (data.errors) {
+                for (var i = 0; i < data.errors.length; i++) {
+                    var key = data.errors[i];
+                    if (key == 'emptyurl' || key == 'invalidurl') {
+                        this._show(this.dom.urlError);
+                    }
+                    if (key == 'nonuniquehash') {
+                        this._show(this.dom.hashUniqueError);
+                    }
+                    if (key == 'invalidhash') {
+                        this._show(this.dom.hashError);
+                    }
+                }
+            }
 		}
 	} else {
 		//@todo logout
