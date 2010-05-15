@@ -203,7 +203,29 @@ class Application extends TObjectStatic  {
 			header("HTTP/1.0 401 Unauthorized");
 		}
 	}
-	
-		
+
+    /**
+     * logout logged user
+     */
+	public function webLogout() {
+       if ($this->isUserLogged()) {
+			if($this->loginManager->logout()) {
+                header("HTTP/1.0 200 OK");
+            } else {
+                header("HTTP/1.0 403 Forbidden");
+            }
+		}
+    }
+
+    public function webDeleteLink() {
+        if ($this->isUserLogged()) {
+            $result = $this->pm->deleteLink($_POST['hash']);
+			$r = new stdClass();
+			$r->status = $result ? 'ok' : 'error';
+			echo json_encode($r);
+        } else {
+			header("HTTP/1.0 401 Unauthorized");
+        }
+    }
 }
 ?>

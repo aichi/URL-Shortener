@@ -5,7 +5,7 @@ class SimpleLoginManager extends TObjectStatic implements ILogin{
 	
 	public function login($user, $password) {return true;}
 	
-	public function logout() {}
+	public function logout() {return true;}
 	
 	public function isLogged() {return true;}
 	

@@ -11,9 +11,11 @@ UrlShortener.prototype.$constructor = function() {
 	this.ec = [];
 	//dom elements cache
 	this.dom = {};
-	
+	//reference on box which is showed
 	this.showedBox = null;
-	
+	//array, where key is idShortenUrl, and value is {deleteLink: elm, statisticsLink: elm}
+    this.linkReference = {};
+
 	this.init();
 };
 
@@ -28,6 +30,8 @@ UrlShortener.prototype.$destructor = function() {
 	for (var p in this.dom) {
 		this.dom[p] = null;
 	}
+
+    this.clearLinkReference();
 };
 
 /**
@@ -46,7 +50,7 @@ UrlShortener.prototype.init = function() {
 	
 	this.ec.push(JAK.Events.addListener(this.dom.menuItemUrlList, 'click', this, 'showUrlListClick'));
 	this.ec.push(JAK.Events.addListener(this.dom.menuItemNewUrl, 'click', this, 'newItemFormClick'));
-	//this.ec.push(JAK.Events.addListener(this.dom.menuItemLogout, 'click', this, 'logoutClick'));
+	this.ec.push(JAK.Events.addListener(this.dom.menuItemLogout, 'click', this, 'logoutClick'));
 	
 	
 	//login
@@ -76,6 +80,7 @@ UrlShortener.prototype.init = function() {
 	this.dom.urlListBox = JAK.gel('url-list-box');
 	this.dom.urlListBody = JAK.gel('url-list-body');
 	this._hide(this.dom.urlListBox);
+    this.ec.push(JAK.Events.addListener(this.dom.urlListBody, 'click', this, '_urlListClick'));
 	
 	
 	//new-url
@@ -150,6 +155,9 @@ UrlShortener.prototype.loginClick = function(e, elm) {
 	}
 	
 	if (status) {
+        this.dom.username.value = '';
+        this.dom.password.value = '';
+
 		var rq = new JAK.Request(JAK.Request.TEXT, {method: 'post'});
 		rq.setCallback(this, '_loginCallback');
 		rq.send('server.php?page=login', {username: this.dom.username.value, password: this.dom.password.value});
@@ -209,8 +217,7 @@ UrlShortener.prototype._showUrlListCallback = function(txt, status) {
 		eval('var data = ' + txt);
 		this._renderUrlList(data);
 	} else {
-		//@todo logout
-		console.log('logout');
+		this.logout();
 	}
 };
 
@@ -230,10 +237,12 @@ UrlShortener.prototype._renderUrlList = function(urls) {
 		var row = JAK.cel('tr');
 		var td1 = JAK.mel('td', {innerHTML: urls[i].originalUrl});
 		var td2 = JAK.cel('td');
-		
-		var link = JAK.mel('a', {href: '#' + urls[i].idUrlShorten, innerHTML: 'Delete'});
+		var dlink = JAK.mel('a', {id: 'd' + urls[i].idUrlShorten, href: '#' + urls[i].idUrlShorten, innerHTML: 'Delete', className: 'delete-link'});
+        var spacer = JAK.ctext('&bull;');
+        var slink = JAK.mel('a', {id: 's' + urls[i].idUrlShorten, href: '#' + urls[i].idUrlShorten, innerHTML: 'Statistics', className: 'statistics-link'});
+        this.linkReference[urls[i].idUrlShorten] = {deleteLink: dlink, statisticsLink: slink};
 	
-		JAK.DOM.append([this.dom.urlListBody, row],[row, td1, td2], [td2, link]);
+		JAK.DOM.append([this.dom.urlListBody, row],[row, td1, td2], [td2, dlink, spacer, slink]);
 	}
 };
 
@@ -332,8 +341,7 @@ UrlShortener.prototype._newUrlListCallback = function(txt, status) {
             }
 		}
 	} else {
-		//@todo logout
-		console.log('logout');
+		this.logout();
 	}
 };
 
@@ -362,6 +370,11 @@ UrlShortener.prototype.checkHash = function(e, elm) {
 	rq.send('server.php?page=checkHash&hash=' + elm.value);
 };
 
+/**
+ * check if hash is uniqe
+ * @param txt
+ * @param status
+ */
 UrlShortener.prototype._checkHashCallback = function(txt, status) {
 	if (status == 200) {
 		eval('var data = ' + txt);
@@ -372,3 +385,90 @@ UrlShortener.prototype._checkHashCallback = function(txt, status) {
 		}
 	}
 };
+
+/*-------------------logout-------------------*/
+/**
+ * callback on menu Logout click
+ * @param e
+ * @param elm
+ */
+UrlShortener.prototype.logoutClick = function(e, elm) {
+    JAK.Events.cancelDef(e);
+    this.logout();
+};
+
+/**
+ * public logout method, send logout callback
+ */
+UrlShortener.prototype.logout = function() {
+    this._show(this.dom.throbberBox);
+
+    var rq = new JAK.Request(JAK.Request.TEXT);
+    rq.setCallback(this, '_logoutCallback');
+    rq.send('server.php?page=logout');
+};
+
+/**
+ * logout callback, show login form after successfull logout
+ */
+UrlShortener.prototype._logoutCallback = function(txt, status) {
+    this._hide(this.dom.throbberBox);
+    if (status == 200) {
+        this._hide(this.showedBox);
+        this._hide(this.dom.menuBox);
+        this.showedBox = this.dom.loginBox;
+		this._show(this.dom.loginBox);
+    }
+};
+
+/*--------------------------URL List click------------------------*/
+
+/**
+ * remove references on all link elements in URL table list
+ */
+UrlShortener.prototype.clearLinkReference = function() {
+    for (var p in this.linkReference) {
+        for (var t in this.linkReference[p]) {
+            this.linkReference[p][t] = null;
+        }
+    }
+    this.linkReference = {};
+};
+
+/**
+ * method handle click on URL list table and decide which method run. It depends
+ * on the click target (link)
+ */
+UrlShortener.prototype._urlListClick = function(e, elm) {
+    JAK.Events.cancelDef(e);
+    var elmClick = JAK.Events.getTarget(e);
+    if (elmClick.nodeName.toLowerCase() == 'a') {
+        var hash = elmClick.id.substr(1);console.log(hash)
+        if (this.linkReference[hash]) {
+            if (this.linkReference[hash].deleteLink == elmClick) {
+                this.deleteLink(hash);
+            } else {
+                this.showStatistics(hash);
+            }
+        }
+    }
+};
+
+UrlShortener.prototype.deleteLink = function(hash) {
+    var rq = new JAK.Request(JAK.Request.TEXT, {method: 'post'});
+    rq.setCallback(this, '_deleteLinkCallback');
+    rq.send('server.php?page=deleteLink', {hash: hash});
+};
+
+UrlShortener.prototype._deleteLinkCallback = function(txt, status) {
+    if (status == 200) {
+        eval('var data = ' + txt);
+		if (data && data.status == 'ok') {
+            this.showUrlList();
+        } else {
+            alert('Something went wrong.');
+        }
+    } else {
+        this.logout();
+    }
+}

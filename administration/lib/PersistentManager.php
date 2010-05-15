@@ -103,7 +103,17 @@ class PersistentManager extends TObjectStatic implements IPersistence {
 		}
 	}
 	
-	
+	public function deleteLink($hash) {
+        $hash = mysql_escape_string($hash);
+
+        $query = "DELETE FROM ".$this->table." WHERE idUrlShorten = '".$hash."' LIMIT 1";
+        $r = mysql_query($query, $this->conn);
+
+        $num =mysql_affected_rows();
+        mysql_free_result($r);
+
+        return $num == 1;
+    }
 	
 }
 ?>
