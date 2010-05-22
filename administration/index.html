@@ -19,18 +19,7 @@
 			<li><a id="menu-new-url" href="#">New URL</a></li>
 			<li><a id="menu-logout" href="#">Logout</a></li>
 		</ul>
-	</div>
-	
-	<div id="login-box">
-		<fieldset>
-			<legend>Login</legend>
-			<p><span>Username:</span><input type="text" id="username" /></p>
-			<p id="username-error" class="error">Username cannot be empty.</p>
-			<p><span>Password:</span><input type="password" id="password" /></p>
-			<p id="password-error" class="error">Password cannot be empty.</p>
-            <p><span>&nbsp;</span><input type="submit" value="Login" id="login-button" /></p>
-			<p id="login-error" class="error">Username or password is not correct.</p>
-		</fieldset>
+        <div class="clear"></div>
 	</div>
 	
 	<div id="url-list-box">
@@ -48,12 +37,13 @@
 	
 	<div id="new-url-box">
 		<fieldset>
+            <legend>New URL</legend>
 			<p><span>URL:</span><input type="text" id="url" /></p>
 			<p id="url-error" class="error">URL is not valid. Do not forget, that URL has to start with protocol, e.g. http://</p>
 			<p><span>Own hash:</span><input type="text" id="hash" /> <span class="info">If empty, hash will be generated.</span></p>
 			<p id="hash-error" class="error">Hash has to contain only letters, numbers and -_ signs.</p>
 			<p id="hash-unique-error" class="error">Hash has to be unique.</p>
-			<p><input type="submit" value="Save" id="new-url-button" /></p>
+			<p><span>&nbsp;</span><input type="submit" value="Save" id="new-url-button" /></p>
 			<p id="new-url-global-error" class="error"></p>
 		</fieldset>
 	</div>
@@ -70,7 +60,19 @@
         <p>Number of clicks: <span id="stats-clicks"></span> and number of global clicks <span id="stats-global-clicks"></span>.</p>
         <p>Statistics on bit.ly site: <a id="bitly-link" href="#"></a>.
     </div>
-	
+
+    <div id="login-box">
+		<fieldset>
+			<legend>Login</legend>
+			<p><span>Username:</span><input type="text" id="username" /></p>
+			<p id="username-error" class="error">Username cannot be empty.</p>
+			<p><span>Password:</span><input type="password" id="password" /></p>
+			<p id="password-error" class="error">Password cannot be empty.</p>
+            <p><span>&nbsp;</span><input type="submit" value="Login" id="login-button" /></p>
+			<p id="login-error" class="error">Username or password is not correct.</p>
+		</fieldset>
+	</div>
+
 	<div id="throbber-box">
 		<img src="./img/throbber.gif" />
 	</div>
