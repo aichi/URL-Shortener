@@ -12,8 +12,8 @@ if (!isset($_GET['url'])) {
 
 $url = strtolower($_GET['url']);
 
-//url parameter does not contain allowed characters - numbers and letters
-if (!preg_match('/^([[:alnum:]])+$/', $url)) {
+//url parameter does not contain allowed characters - numbers and letters and .-_
+if (!preg_match('/^([a-zA-Z0-9\.\-_])+$/', $url)) {
 	header("HTTP/1.0 415 Unsupported Media Type");
 	exit;
 }

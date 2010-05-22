@@ -146,7 +146,7 @@ class Application extends TObjectStatic  {
 				$errors[] = 'nonuniquehash';
 			}
 			
-            $hashregexp = "/[a-zA-z0-9_\-]*/";
+            $hashregexp = "/^[a-zA-z0-9_\-\.]*$/";
             if (!empty($hash) && !preg_match($hashregexp, $hash)) {
                 $r->status = 'error';
                 $errors[] = 'invalidhash';

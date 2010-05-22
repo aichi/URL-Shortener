@@ -238,7 +238,7 @@ UrlShortener.prototype._renderUrlList = function(urls) {
 		var td1 = JAK.mel('td', {innerHTML: urls[i].originalUrl});
 		var td2 = JAK.cel('td');
 		var dlink = JAK.mel('a', {id: 'd' + urls[i].idUrlShorten, href: '#' + urls[i].idUrlShorten, innerHTML: 'Delete', className: 'delete-link'});
-        var spacer = JAK.ctext('&bull;');
+        var spacer = JAK.ctext(' • ');
         var slink = JAK.mel('a', {id: 's' + urls[i].idUrlShorten, href: '#' + urls[i].idUrlShorten, innerHTML: 'Statistics', className: 'statistics-link'});
         this.linkReference[urls[i].idUrlShorten] = {deleteLink: dlink, statisticsLink: slink};
 	
@@ -357,7 +357,7 @@ UrlShortener.prototype._isUrl = function(s) {
  * test if string is valid Hash
  */
 UrlShortener.prototype._isHash = function(s) {
-	var regexp = /[a-zA-z0-9_\-]*/;
+	var regexp = /[a-zA-z0-9_\-\.]*/;
 	return regexp.test(s);
 };
 
@@ -443,7 +443,7 @@ UrlShortener.prototype._urlListClick = function(e, elm) {
     JAK.Events.cancelDef(e);
     var elmClick = JAK.Events.getTarget(e);
     if (elmClick.nodeName.toLowerCase() == 'a') {
-        var hash = elmClick.id.substr(1);console.log(hash)
+        var hash = elmClick.id.substr(1);
         if (this.linkReference[hash]) {
             if (this.linkReference[hash].deleteLink == elmClick) {
                 this.deleteLink(hash);
