@@ -102,6 +102,26 @@ class PersistentManager extends TObjectStatic implements IPersistence {
 			return false;
 		}
 	}
+
+    public function getUrlByHash($hash) {
+		$hash = mysql_escape_string($hash);
+		$query = "SELECT idUrlShorten AS hash, originalUrl AS url, bitlyHash FROM ".$this->table." WHERE idUrlShorten = '".$hash."'";
+
+		$ret = false;
+		$r = mysql_query($query, $this->conn);
+		if( mysql_num_rows($r) == 1) {
+			$ret = true;
+			$result = mysql_fetch_assoc($r);
+		}
+		mysql_free_result($r);
+
+
+		if ($ret == true) {
+			return $result;
+		} else {
+			return false;
+		}
+	}
 	
 	public function deleteLink($hash) {
         $hash = mysql_escape_string($hash);
@@ -110,10 +130,11 @@ class PersistentManager extends TObjectStatic implements IPersistence {
         $r = mysql_query($query, $this->conn);
 
         $num =mysql_affected_rows();
-        mysql_free_result($r);
+        //mysql_free_result($r);
 
         return $num == 1;
     }
+    
 	
 }
 ?>

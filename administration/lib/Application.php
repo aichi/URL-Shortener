@@ -146,8 +146,7 @@ class Application extends TObjectStatic  {
 				$errors[] = 'nonuniquehash';
 			}
 			
-            $hashregexp = "/^[a-zA-z0-9_\-\.]*$/";
-            if (!empty($hash) && !preg_match($hashregexp, $hash)) {
+            if (!$this->isHash($hash)) {
                 $r->status = 'error';
                 $errors[] = 'invalidhash';
             }
@@ -159,13 +158,8 @@ class Application extends TObjectStatic  {
 		
 				$u = urlencode($_REQUEST['url']); 
 				$urlli = "http://api.bit.ly/v3/shorten?login=".$conf['login']."&apiKey=".$conf['apikey']."&uri=$u&format=json";
-				
-				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_HEADER, 0);
-				curl_setopt($ch, CURLOPT_URL, $urlli);
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-				$response = curl_exec($ch); 
-				curl_close($ch);
+
+                $response = $this->queryShortener($urlli);
 
 				$data = json_decode($response);
                 
@@ -204,6 +198,31 @@ class Application extends TObjectStatic  {
 		}
 	}
 
+    public function isHash($hash) {
+        $hashregexp = "/^[a-zA-z0-9_\-\.]*$/";
+        if (!empty($hash) && !preg_match($hashregexp, $hash)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     *  query bitly and return result
+     *
+     * @param string $url
+     * @return string
+     */
+    protected function queryShortener($url) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        return $response;
+    }
+
     /**
      * logout logged user
      */
@@ -217,12 +236,62 @@ class Application extends TObjectStatic  {
 		}
     }
 
+    /**
+     * delete given url
+     */
     public function webDeleteLink() {
         if ($this->isUserLogged()) {
-            $result = $this->pm->deleteLink($_POST['hash']);
-			$r = new stdClass();
-			$r->status = $result ? 'ok' : 'error';
-			echo json_encode($r);
+            $r = new stdClass();
+            if ($this->isHash($_POST['hash'])) {
+                $result = $this->pm->deleteLink($_POST['hash']);
+
+                $r->status = $result ? 'ok' : 'error';
+
+            } else {
+                $r->status = 'error';
+                $r->errorText = 'Hash is not valid.';
+            }
+            echo json_encode($r);
+        } else {
+			header("HTTP/1.0 401 Unauthorized");
+        }
+    }
+
+    /**
+     * get clicks for given url
+     */
+    public function webStatisticsLink() {
+        if ($this->isUserLogged()) {
+            $r = new stdClass();
+            if ($this->isHash($_POST['hash'])) {
+                $result = $this->pm->getUrlByHash($_POST['hash']);
+
+                if ($result) {
+                    $conf = $this->config['bitly'];
+
+                    $url = "http://api.bit.ly/v3/clicks?login=".$conf['login']."&apiKey=".$conf['apikey']."&hash=".$result['bitlyHash']."&format=json";
+                    $response = $this->queryShortener($url);
+
+                    $data = json_decode($response);
+
+                    if ($data && $data->status_code == 200) {
+                        $r->clicks = $data->data->clicks[0]->user_clicks;
+                        $r->global_clicks = $data->data->clicks[0]->global_clicks;
+                        $r->statistics_url = 'http://bit.ly/' . $result['bitlyHash'] . '+';
+                        $r->url = $result['url'];
+                        $r->status = 'ok';
+                    } else {
+                        $r->status = 'error';
+                        $r->errorText = $data->status_txt;
+                    }
+                } else {
+                    $r->status = 'error';
+                }
+            } else {
+                $r->status = 'error';
+                $r->errorText = 'Hash is not valid.';
+            }
+            echo json_encode($r);
         } else {
 			header("HTTP/1.0 401 Unauthorized");
         }

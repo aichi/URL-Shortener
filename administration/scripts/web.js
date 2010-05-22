@@ -15,6 +15,8 @@ UrlShortener.prototype.$constructor = function() {
 	this.showedBox = null;
 	//array, where key is idShortenUrl, and value is {deleteLink: elm, statisticsLink: elm}
     this.linkReference = {};
+    //element on which was clicked (statistics, delete)
+    this.urlListElmClick = null;
 
 	this.init();
 };
@@ -31,6 +33,8 @@ UrlShortener.prototype.$destructor = function() {
 		this.dom[p] = null;
 	}
 
+    this.urlListElmClick = null;
+    
     this.clearLinkReference();
 };
 
@@ -39,6 +43,7 @@ UrlShortener.prototype.$destructor = function() {
  */
 UrlShortener.prototype.init = function() {
 	this.ec.push(JAK.Events.addListener(window, 'unload', this, '$destructor'));
+    this.ec.push(JAK.Events.addListener(document, 'click', this, '_documentClick'));
 	
 	//menu
 	this.dom.menuBox = JAK.gel('menu-box');
@@ -110,6 +115,15 @@ UrlShortener.prototype.init = function() {
     this.dom.qrCode = JAK.gel('qr-code');
 	
 	this._hide(this.dom.newUrlResultBox);
+
+    //statistics
+    this.dom.statisticsBox = JAK.gel('statistics-box');
+    this.dom.statsUrl = JAK.gel('stats-url');
+    this.dom.statsClicks = JAK.gel('stats-clicks');
+    this.dom.statsGlobalClicks = JAK.gel('stats-global-clicks')
+    this.dom.bitlyLink = JAK.gel('bitly-link');
+
+    this._hide(this.dom.statisticsBox);
 };
 
 /**
@@ -445,6 +459,8 @@ UrlShortener.prototype._urlListClick = function(e, elm) {
     if (elmClick.nodeName.toLowerCase() == 'a') {
         var hash = elmClick.id.substr(1);
         if (this.linkReference[hash]) {
+            this.urlListElmClick = elmClick; //save reference
+            JAK.Events.stopEvent(e);
             if (this.linkReference[hash].deleteLink == elmClick) {
                 this.deleteLink(hash);
             } else {
@@ -454,12 +470,21 @@ UrlShortener.prototype._urlListClick = function(e, elm) {
     }
 };
 
+/**
+ * user used Delete link
+ * @param hash
+ */
 UrlShortener.prototype.deleteLink = function(hash) {
     var rq = new JAK.Request(JAK.Request.TEXT, {method: 'post'});
     rq.setCallback(this, '_deleteLinkCallback');
     rq.send('server.php?page=deleteLink', {hash: hash});
 };
 
+/**
+ * delete link callback
+ * @param txt
+ * @param status
+ */
 UrlShortener.prototype._deleteLinkCallback = function(txt, status) {
     if (status == 200) {
         eval('var data = ' + txt);
@@ -470,5 +495,51 @@ UrlShortener.prototype._deleteLinkCallback = function(txt, status) {
         }
     } else {
         this.logout();
+    }
+};
+
+/**
+ * user used Statistics link
+ * @param hash
+ */
+UrlShortener.prototype.showStatistics = function(hash) {
+    var rq = new JAK.Request(JAK.Request.TEXT, {method: 'post'});
+    rq.setCallback(this, '_statisticsLinkCallback');
+    rq.send('server.php?page=statisticsLink', {hash: hash});
+};
+
+/**
+ * statistics link callback
+ * @param txt
+ * @param status
+ */
+UrlShortener.prototype._statisticsLinkCallback = function(txt, status) {
+    if (status == 200) {
+        eval('var data = ' + txt);
+		if (data && data.status == 'ok') {
+            //@todo show stats
+            var pos = JAK.DOM.getBoxPosition(this.urlListElmClick);
+
+            this.dom.statisticsBox.style.top = pos.top + 'px';
+            this.dom.statisticsBox.style.left = pos.left + 'px';
+            this._show(this.dom.statisticsBox);
+
+            this.dom.statsUrl.innerHTML = data.url;
+            this.dom.statsClicks.innerHTML = data.clicks;
+            this.dom.statsGlobalClicks.innerHTML = data.global_clicks;
+            this.dom.bitlyLink.innerHTML = data.statistics_url;
+               this.dom.bitlyLink.href = data.statistics_url;
+        } else {
+            alert('Something went wrong.');
+        }
+    } else {
+        this.logout();
+    }
+};
+
+UrlShortener.prototype._documentClick = function(e, elm) {
+    if (this.urlListElmClick) {
+        this.urlListElmClick = null;
+        this._hide(this.dom.statisticsBox);
     }
 }

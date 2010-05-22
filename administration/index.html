@@ -5,6 +5,7 @@
 	<title>URL Shortener administration</title>
 	<script type="text/javascript" src="./scripts/jak.js"></script>
 	<script type="text/javascript" src="./scripts/web.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
 	<link href="./css/web.css" rel="stylesheet"/>
 </head>
 <body>
@@ -27,7 +28,7 @@
 			<p id="username-error" class="error">Username cannot be empty.</p>
 			<p><span>Password:</span><input type="password" id="password" /></p>
 			<p id="password-error" class="error">Password cannot be empty.</p>
-			<p><input type="submit" value="Login" id="login-button" /></p>
+            <p><span>&nbsp;</span><input type="submit" value="Login" id="login-button" /></p>
 			<p id="login-error" class="error">Username or password is not correct.</p>
 		</fieldset>
 	</div>
@@ -63,6 +64,12 @@
         <p>QR code of shortened link:</p>
         <p><img id="qr-code" src="" alt="qrcode"  /></p>
 	</div>
+
+    <div id="statistics-box">
+        <p>Short summary for link <span id="stats-url"></span>.</p>
+        <p>Number of clicks: <span id="stats-clicks"></span> and number of global clicks <span id="stats-global-clicks"></span>.</p>
+        <p>Statistics on bit.ly site: <a id="bitly-link" href="#"></a>.
+    </div>
 	
 	<div id="throbber-box">
 		<img src="./img/throbber.gif" />
