@@ -60,6 +60,7 @@ UrlShortener.prototype.init = function() {
 	
 	//login
 	this.dom.loginBox = JAK.gel('login-box');
+	this.dom.loginForm = JAK.gel('login-form');
 	this.dom.username = JAK.gel('username');
 	this.dom.password = JAK.gel('password');
 	this.dom.loginButton = JAK.gel('login-button');
@@ -72,6 +73,7 @@ UrlShortener.prototype.init = function() {
 	this._hide(this.dom.loginError);
 	
 	this.ec.push(JAK.Events.addListener(this.dom.loginButton, 'click', this, 'loginClick'));
+	this.ec.push(JAK.Events.addListener(this.dom.loginForm, 'submit', this, 'loginClick'));
 	
 	this.showedBox = this.dom.loginBox;
 	
