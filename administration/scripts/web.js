@@ -169,12 +169,12 @@ UrlShortener.prototype.loginClick = function(e, elm) {
 	}
 	
 	if (status) {
-        this.dom.username.value = '';
-        this.dom.password.value = '';
-
 		var rq = new JAK.Request(JAK.Request.TEXT, {method: 'post'});
 		rq.setCallback(this, '_loginCallback');
 		rq.send('server.php?page=login', {username: this.dom.username.value, password: this.dom.password.value});
+		
+		this.dom.username.value = '';
+        this.dom.password.value = '';
 	}
 };
 
