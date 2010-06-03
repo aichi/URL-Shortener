@@ -9,9 +9,9 @@ class SimpleLoginManager extends TObjectStatic implements ILogin{
 	
 	public function isLogged() {return true;}
 	
-	public static function getInstance() {
+	public static function getInstance($init) {
 		if (SimpleLoginManager::$instance == null) {
-			$pm = new SimpleLoginManager();
+			$pm = new SimpleLoginManager($init);
 //			if (!$pm->init()) {
 //				return false;
 //			}

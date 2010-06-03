@@ -44,7 +44,7 @@ class Application extends TObjectStatic  {
 		
 		$l = $this->config['loginManager'];
 		require_once "./lib/$l.php";
-		$loginManager = call_user_func(array($l,'getInstance'));
+		$loginManager = call_user_func(array($l,'getInstance'), $this->config);
 		if ($loginManager instanceof ILogin) {
 			$this->loginManager = $loginManager;
 		} else {

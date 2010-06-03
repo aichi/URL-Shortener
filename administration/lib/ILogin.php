@@ -7,7 +7,7 @@ interface ILogin {
 	
 	public function isLogged();
 	
-	public static function getInstance();
+	public static function getInstance($init);
 }
 
 ?>
