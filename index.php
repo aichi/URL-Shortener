@@ -25,7 +25,7 @@ if (!$conn || !mysql_select_db($db_conf['database'], $conn)) {
 	exit;
 } 
 
-$query = "SELECT bitlyHash FROM ".$db_conf['table']." WHERE idUrlShorten='$url' LIMIT 1";
+$query = "SELECT shortenerHash FROM ".$db_conf['table']." WHERE idUrlShorten='$url' LIMIT 1";
 $result = mysql_query($query);
 //bad table
 if (!$result) {
@@ -40,8 +40,7 @@ if (!$row) {
 	exit;
 }
 
-//everything OK, redirect to bit.ly
+//everything OK, redirect to original shortener (bit.ly)
 header("HTTP/1.0 301 Moved");
-header("Location: http://bit.ly/".$row[0]);
+header("Location: ".$CONFIG[$server]['shortenerConnectorConfig']['url'].$row[0]);
 exit;
-?>

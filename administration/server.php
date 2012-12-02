@@ -1,23 +1,17 @@
 <?php
 require_once '../config.php';
 
-require_once './lib/TObject.php';
-require_once './lib/TObjectStatic.php';
-require_once './lib/Application.php';
-require_once './lib/ILogin.php';
-require_once './lib/IPersistence.php';
+$directory = '.'.DIRECTORY_SEPARATOR."lib".DIRECTORY_SEPARATOR;
+require_once $directory."Autoloader.php";
+Autoloader::register($directory);
 
 session_start();
 
-$app = Application::getInstance($CONFIG);
+try {
+	$app = new UrlShortener\Application($CONFIG);
 
-if (!isset($_REQUEST['page'])) {
-	$_REQUEST['page'] = 'urlList';
+	$app->execute();
+} catch (Exception $e) {
+	//some nice 500 page
 }
 
-if ($app->isUserLogged() && in_array(strtolower($_REQUEST['page']), $app->allowedPages() ) ) {
-	$app->{'web'.$_REQUEST['page']}();
-} else { 
-	$app->webLogin();
-}
-?>

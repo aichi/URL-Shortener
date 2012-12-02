@@ -1,86 +1,133 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>URL Shortener administration</title>
-	<script type="text/javascript" src="./scripts/jak.js"></script>
-	<script type="text/javascript" src="./scripts/web.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
+	<script type="text/javascript" src="./scripts/Proto.js"></script>
+	<script type="text/javascript" src="./scripts/native.history.js"></script>
+	<script type="text/javascript" src="./scripts/application.js"></script>
+	<script type="text/javascript" src="./scripts/module.js"></script>
+	<script type="text/javascript" src="./scripts/login.js"></script>
+	<script type="text/javascript" src="./scripts/urllist.js"></script>
+	<script type="text/javascript" src="./scripts/newurl.js"></script>
+	<script type="text/javascript" src="./scripts/urldetail.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Russo+One' rel='stylesheet' type='text/css'/>
+	<link href="./css/bootstrap.min.css" rel="stylesheet"/>
 	<link href="./css/web.css" rel="stylesheet"/>
 </head>
 <body>
-	<div id="header">
-		<h1>URL Shortener</h1>
-	</div>
-	
-	<div id="menu-box">
-		<ul>
-			<li><a id="menu-url-list" href="#">URL List</a></li>
-			<li><a id="menu-new-url" href="#">New URL</a></li>
-			<li><a id="menu-logout" href="#">Logout</a></li>
-		</ul>
-        <div class="clear"></div>
-	</div>
-	
-	<div id="url-list-box">
-		<table>
-			<thead>
-				<tr>
-					<th>URL</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody id="url-list-body">
-			</tbody>
-		</table>
-	</div>
-	
-	<div id="new-url-box">
-		<fieldset>
-            <legend>New URL</legend>
-			<p><span>URL:</span><input type="text" id="url" /></p>
-			<p id="url-error" class="error">URL is not valid. Do not forget, that URL has to start with protocol, e.g. http://</p>
-			<p><span>Own hash:</span><input type="text" id="hash" /> <span class="info">If empty, hash will be generated.</span></p>
-			<p id="hash-error" class="error">Hash has to contain only letters, numbers and -_ signs.</p>
-			<p id="hash-unique-error" class="error">Hash has to be unique.</p>
-			<p><span>&nbsp;</span><input type="submit" value="Save" id="new-url-button" /></p>
-			<p id="new-url-global-error" class="error"></p>
-		</fieldset>
-	</div>
-	
-	<div id="new-url-result-box">
-		<p>Your URL: <a id="new-url" href="#"></a> had been shorten to:	<a id="new-shorten-url" href="#"></a>.</p>
-		<p>You should easy copy it from this input: <input id="new-shorten-url-input" type="text" /></p>
-        <p>QR code of shortened link:</p>
-        <p><img id="qr-code" src="" alt="qrcode"  /></p>
-	</div>
+	<div class="container">
+		<div id="header">
+			<h1>~[URL]~</h1>
+		</div>
 
-    <div id="statistics-box">
-        <p>Short summary for link <span id="stats-url"></span>.</p>
-        <p>Number of clicks: <span id="stats-clicks"></span> and number of global clicks <span id="stats-global-clicks"></span>.</p>
-        <p>Statistics on bit.ly site: <a id="bitly-link" href="#"></a>.
-    </div>
+		<div id="menu-box">
+			<ul  id="menu-box-list" class="nav nav-pills">
+				<!-- Dynamically generated -->
+				<!--li><a id="menu-url-list" href="#">URL List</a></li>
+				<li><a id="menu-new-url" href="#">New URL</a></li>
+				<li><a id="menu-logout" href="#">Logout</a></li-->
+			</ul>
+			<div class="clear"></div>
+		</div>
 
-    <div id="login-box">
-    	<form method="post" action="." id="login-form">
-		<fieldset>
-			<legend>Login</legend>
-			<p><span>Username:</span><input type="text" id="username" /></p>
-			<p id="username-error" class="error">Username cannot be empty.</p>
-			<p><span>Password:</span><input type="password" id="password" /></p>
-			<p id="password-error" class="error">Password cannot be empty.</p>
-            <p><span>&nbsp;</span><input type="submit" value="Login" id="login-button" /></p>
-			<p id="login-error" class="error">Username or password is not correct.</p>
-		</fieldset>
-		</form>
+		<div id="content-box"></div>
+
+		<section id="url-list-box">
+			<h2>Shortened URLs</h2>
+			<table class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>URL</th>
+						<th>Short</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody id="url-list-body">
+				</tbody>
+			</table>
+		</section>
+
+		<div id="new-url-box" class="well form-horizontal">
+			<p id="new-url-success" class="text-success controls">URL was saved successfully.</p>
+			<fieldset>
+				<legend>New URL</legend>
+				<div class="control-group">
+					<label class="control-label" for="url">URL</label>
+					<div class="controls">
+						<input type="text" id="url" />
+						<span id="url-error" class="help-inline error">URL is not valid. Do not forget, that URL has to start with protocol, e.g. http://</span>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label" for="hash">Own hash</label>
+					<div class="controls">
+						<input type="text" id="hash" /> <span class="info">Hash will be generate, when empty.</span><br />
+						<span id="hash-error" class="help-inline error">Hash has to contain only letters, numbers and -_ signs.</span>
+						<span id="hash-unique-error" class="help-inline error">Hash has to be unique.</span>
+					</div>
+				</div>
+				<div class="form-actions">
+					<input type="submit" value="Save" id="new-url-button" class="btn btn-large" />
+					<span id="new-url-global-error" class="help-inline error"></span>
+				</div>
+			</fieldset>
+		</div>
+
+		<section id="url-detail-box">
+			<h2>URL detail</h2>
+			<p>URL <a id="new-url" href="#" target="_blank"></a> was shorten to: <a id="new-shorten-url" href="#" target="_blank"></a>.</p>
+			<p>You should easy copy it from this input: <input id="new-shorten-url-input" type="text" /></p>
+			<p>QR code of shortened link:</p>
+			<p class="thumbnail"><img id="qr-code" src="" alt="qrcode"  /></p>
+
+			<div id="statistics-box">
+				<h3>Statistics</h3>
+				<p>Short summary for link <span id="stats-url"></span>.</p>
+				<p>Number of clicks: <span id="stats-clicks"></span> and number of global clicks <span id="stats-global-clicks"></span>.</p>
+				<p>Statistics on bit.ly site: <a id="detail-link" href="#"></a>.
+			</div>
+		</section>
+
+
+		<div id="login-box" class="span4">
+			<form method="post" action="." id="login-form" class="well">
+			<fieldset>
+				<legend>Login</legend>
+				<div class="control-group">
+					<label class="control-label" for="username">Username</label>
+					<div class="controls">
+						<input type="text" id="username" />
+						<span id="username-error" class="help-inline error">Username cannot be empty.</span>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label" for="password">Password</label>
+					<div class="controls">
+						<input type="password" id="password" />
+						<span id="password-error" class="help-inline error">Password cannot be empty.</span>
+					</div>
+				</div>
+				<div class="form-actions">
+					<input type="submit" value="Login" id="login-button" class="btn btn-large" />
+					<span id="login-error" class="help-inline error">Username or password is not correct.</span>
+				</div>
+			</fieldset>
+			</form>
+		</div>
+
+		<div id="throbber-box">
+			<img src="./img/throbber.gif" />
+		</div>
+
+		<div id="error-page" class="alert alert-error alert-block well-large">
+			<h1 id="error-code" class="alert-heading"></h1>
+			<p>Please repeat your request later.</p>
+		</div>
+
+		<script type="text/javascript">
+			var us = UrlShortener.Application.new();
+		</script>
 	</div>
-
-	<div id="throbber-box">
-		<img src="./img/throbber.gif" />
-	</div>
-
-	<script type="text/javascript">
-		var us = new UrlShortener();
-	</script>
 </body>
 </html>

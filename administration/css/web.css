@@ -4,44 +4,44 @@ html,body               {margin: 0;padding: 0;font-family: "Arial CE",Arial,"Hel
 html                    {font-size:106.5%}
 body                    {font-size:76.5%}
 table                   {font-size:100%}
-a                       {color:#B11A6C}
+/*a                       {color:#B11A6C}
 a:hover                 {color:#B11A6C;}
-a:visited               {color:#B11A6C}
+a:visited               {color:#B11A6C}  */
 img                     {border:0}
 p,img,table,tr,th,td,form,fieldset,dl,dt,dd,h1,h2,h3,h4,h5  {border: 0px none;margin: 0px;padding: 0px}
 ul,li,ol                {padding: 0px;margin: 0px;list-style-type: none}
-h1,h2,h3,h4,h5          {font-size:150%;font-weight:normal}
 
 .hidden                 { display : none; }
 .clear                  { clear: both; }
-.error          		{ color: red; background: none repeat scroll 0 0 #7B2206; clear: both; }
+span.error         		{ color: red; }
 
-body, html              { background: none repeat scroll 0 0 #BE1853; color: white;}
+body, html              {}
 
-body                    { text-align:center;}
-body div                { text-align:left; }
+#header                 { font-size: 170%; padding: 0.5em 0.3em; font-family: 'Russo One', sans-serif;}
 
-#header                 { font-size: 170%; padding: 0.5em 0.3em; background: none repeat scroll 0 0 #6C052A; color: white; font-family: 'Droid Sans',"Arial CE",Arial,"Helvetica CE",Helvetica,sans-serif;}
+#menu-box				{
+	width: 100%;
+	height: 36px;
+	border: 1px solid #E5E5E5;
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+	border-radius: 0;
+	-webkit-box-shadow: inset 0 1px 0 white, 0 1px 5px rgba(0, 0, 0, .1);
+	-moz-box-shadow: inset 0 1px 0 #fff, 0 1px 5px rgba(0,0,0,.1);
+	box-shadow: inset 0 1px 0 white, 0 1px 5px rgba(0, 0, 0, .1);
+	filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+	background-color: #EEE;
+	background-repeat: repeat-x;
+	background-image: -moz-linear-gradient(top, whiteSmoke 0%, #EEE 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,whiteSmoke), color-stop(100%,#EEE));
+	background-image: -webkit-linear-gradient(top, whiteSmoke 0%,#EEE 100%);
+	background-image: -ms-linear-gradient(top, whiteSmoke 0%,#EEE 100%);
+	background-image: -o-linear-gradient(top, whiteSmoke 0%,#EEE 100%);
+	background-image: linear-gradient(top, whiteSmoke 0%,#EEE 100%);
+}
+#menu-box a, #menu-box a:hover, #menu-box a:visited  {color:#B11A6C}
+#menu-box .active a, #menu-box .active a:hover, #menu-box .active a:visited {background-color: #F29B99;}
 
-#menu-box               { background: none repeat scroll 0 0 #F29B99; margin-bottom: 2em; }
-#menu-box ul            { margin: 0 0.3em; }
-#menu-box li            { display: block; float: left; margin: 0.5em 0; }
-#menu-box a             { margin: 0 0.5em;}
-#menu-box a:hover       {color:#F29B99; background-color: #B11A6C;}
+.thumbnail {display: inline-block;}
 
-#login-box              { margin: 150px auto; width: 300px; border: 1px dotted white;  padding: 0.3em;}
-fieldset legend         { font-weight: bold; font-size: 130%; margin-bottom: 0.3em; }
-fieldset p span         { width: 100px; display: block; float: left; text-align: right; margin-right: 1em; clear: left;}
-fieldset p input        { display: block; float: left; margin-bottom: 0.1em;}
-fieldset p span.info    { display: inline; clear: none; width: auto; text-align: left; margin-left: 1em; }
-
-
-#url-list-box table     { border-collapse: collapse; margin: 0 0 1em 0.5em; }
-#url-list-box th        { font-weight: bold; background-color: #6C052A; }
-#url-list-box td, #url-list-box th        { padding: 0.2em 0.2em; border-bottom: 1px solid #F29B99; }
-#url-list-box a         { color: #6C052A; }
-
-
-#statistics-box         { position: absolute; background-color: #6C052A; padding: 0.6em; }
-
-#throbber-box           { margin: 300px auto; width: 32px; }
+section {padding-top: 30px;}
