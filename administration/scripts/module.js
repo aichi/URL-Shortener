@@ -13,7 +13,7 @@
 			/**
 			 * Unique name of the module, used as a key in array
 			 * of active modules of application
-			 * @type {String}
+			 * @type String
 			 * @readonly
 			 * @public
 			 */
@@ -21,25 +21,26 @@
 
 			/**
 			 * Events id cache
-			 * @type {String[]}
+			 * @type String[]
 			 */
 			this._ec = [];
 
 			/**
 			 * DOM elements cache
-			 * @type {Object}
+			 * @type Object
 			 */
 			this._dom = {};
 
 			/**
 			 * Property which holds parent application instance
-			 * @type {UrlShortener.Application}
+			 * @type UrlShortener.Application
 			 */
 			this._app = app;
 
 			/**
 			 * Array of objects {what: "eventName", callback: callback_func}. Callback function is
 			 * called with one parameter: data literal object.
+			 * @type Object[]
 			 */
 			this._internalEventListeners = [];
 		},

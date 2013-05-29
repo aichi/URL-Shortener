@@ -12,6 +12,7 @@ try {
 
 	$app->execute();
 } catch (Exception $e) {
+	print_r($e);
 	//some nice 500 page
 }
 

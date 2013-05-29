@@ -9,6 +9,7 @@ class Autoloader {
 
 	/**
 	 * Registers own autoloader the SPL autoloader stack.
+	 * @param string $directory
 	 * @return boolean Returns true if registration was successful, false otherwise.
 	 */
 	public static function register($directory) {

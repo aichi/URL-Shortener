@@ -29,7 +29,7 @@
 		/**
 		 * Mandatory property defined in Module interface
 		 * @public
-		 * @type {String}
+		 * @type String
 		 * @name UrlShortener.UrlList#name
 		 */
 		//defined in constructor()
@@ -42,7 +42,7 @@
 
 		/**
 		 * Hash table for storing links rendered in table, link shorten hash is a 'hash'
-		 * @type {Object}
+		 * @type Object
 		 */
 		_linkReference: {},
 
@@ -267,24 +267,24 @@
 
 				row = doc.createElement("tr");
 				td1 = doc.createElement("td");
-				td1.innerHTML = item.originalUrl;
+				td1.innerHTML = item.url;
 
 				td2 = doc.createElement("td");
 				shortUrl = doc.createElement("span");
-				shortUrl.innerHTML = urls.url + item.idUrlShorten;
+				shortUrl.innerHTML = urls.url + item.hash;
 				td2.appendChild(shortUrl);
 
 				td3 = doc.createElement("td");
 				dlink = doc.createElement("a");
-				dlink.id = "d" + item.idUrlShorten;
+				dlink.id = "d" + item.hash;
 				dlink.className = "btn btn-danger btn-small";
-				dlink.href = "#" + item.idUrlShorten;
+				dlink.href = "#" + item.hash;
 				dlink.innerHTML = "Delete";
 				spacer = doc.createTextNode(" ");
 				slink = doc.createElement("a");
-				slink.id = "s" + item.idUrlShorten;
+				slink.id = "s" + item.hash;
 				slink.className = "btn btn-info btn-small";
-				slink.href = "&params=" + JSON.stringify({hash: item.idUrlShorten});
+				slink.href = "&params=" + JSON.stringify({hash: item.hash});
 				slink.innerHTML = "Detail &amp; statistics";
 				td3.appendChild(dlink);
 				td3.appendChild(spacer);
@@ -295,7 +295,7 @@
 				row.appendChild(td3);
 				urlListBody.appendChild(row);
 
-				linkReference[item.idUrlShorten] = {deleteLink: dlink, detailLink: slink, url: item.originalUrl};
+				linkReference[item.hash] = {deleteLink: dlink, detailLink: slink, url: item.url};
 			}
 		}
 	});

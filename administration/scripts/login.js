@@ -29,7 +29,7 @@
 		/**
 		 * Mandatory property defined in Module interface
 		 * @public
-		 * @type {String}
+		 * @type String
 		 * @name UrlShortener.Login#name
 		 */
 		//defined in constructor()

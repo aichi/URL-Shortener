@@ -195,13 +195,13 @@ window.UrlShortener = self.UrlShortener || {
 
 		/**
 		 * Events id cache
-		 * @type {String[]}
+		 * @type String[]
 		 */
 		_ec: [],
 
 		/**
 		 * DOM elements cache
-		 * @type {Object}
+		 * @type Object
 		 */
 		_dom: {},
 
@@ -210,19 +210,19 @@ window.UrlShortener = self.UrlShortener || {
 		 * application is taking care about menu, and giving modules some
 		 * space to render in. Special module is Login which takes care also
 		 * about session handling.
-		 * @type {Object}
+		 * @type Object
 		 */
 		modules: {},
 
 		/**
 		 * module which is active and rendered
-		 * @type {UrlShortener.IModule}
+		 * @type UrlShortener.IModule
 		 */
 		activeModule: null,
 
 		/**
 		 * Active menu button LI DOM node
-		 * @type {Node}
+		 * @type HTMLElement
 		 */
 		_activeMenuNode: null,
 
@@ -233,6 +233,7 @@ window.UrlShortener = self.UrlShortener || {
 		 * - index is determining order
 		 * - node is prepared node element, because it is not needed to recreate them all the time user add or remove
 		 * item from menu
+		 * @type Object[]
 		 */
 		_menuRegistry: [],
 
@@ -355,7 +356,6 @@ window.UrlShortener = self.UrlShortener || {
 		/**
 		 * Method gets module or module name and check if it is valid module, if user is logged and return correct module.
 		 * @param {String|UrlShortener.Module} [moduleName]
-		 * @param {Object} [params]
 		 * @returns {UrlShortener.Module}
 		 */
 		_prepareModule: function(moduleName) {
@@ -419,7 +419,7 @@ window.UrlShortener = self.UrlShortener || {
 				var txt = rq.responseText,
 					status = rq.status;
 
-				if (status >= 400 & status !== 401) { // There is error
+				if (status >= 400 && status !== 401) { // There is error
 					that._showErrorPage(status);
 				} else { //OK, or unauthorized
 					if (status == 401) { //401 unauthorised -> login

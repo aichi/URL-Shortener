@@ -1,15 +1,37 @@
 <?php
 namespace UrlShortener;
-
+/**
+ * Class BitlyConnector implements IShortenerConnector interface and use Bit.ly v3 API to store hashes and get
+ * statistics for them.
+ * @package UrlShortener
+ */
 class BitlyConnector implements IShortenerConnector{
+	/**
+	 * Login name to Bit.ly API
+	 * @var string
+	 */
 	private $login;
+
+	/**
+	 * Password to Bit.ly API
+	 * @var string
+	 */
 	private $apikey;
 
+	/**
+	 * Constructor
+	 * @param array $param Associative array with 'login' and 'apikey' params.
+	 */
 	public function __construct($param) {
 		$this->login = $param["login"];
 		$this->apikey = $param["apikey"];
 	}
 
+	/**
+	 * Returns shortener hash for given URL.
+	 * @param string $url
+	 * @return array
+	 */
 	public function newURL($url) {
 		$u = urlencode($url);
 		$urlli = "http://api.bit.ly/v3/shorten?login=".$this->login."&apiKey=".$this->apikey."&uri=$u&format=json";
@@ -31,6 +53,11 @@ class BitlyConnector implements IShortenerConnector{
 
 	}
 
+	/**
+	 * Returns statistics for given hash.
+	 * @param string $hash Bit.ly hash.
+	 * @return array
+	 */
 	public function statisticForUrl($hash) {
 		$url = "http://api.bit.ly/v3/clicks?login=".$this->login."&apiKey=".$this->apikey."&hash=".$hash."&format=json";
         $response = $this->queryShortener($url);
@@ -51,41 +78,19 @@ class BitlyConnector implements IShortenerConnector{
 	}
 
 	/**
-     *  query bitly and return result
+     *  Method queries Bit.ly and returns result.
      *
      * @param string $url
-     * @return string
+     * @return string JSON string
      */
-//    protected function queryShortener($url) {
-//        $ch = curl_init();
-//        curl_setopt($ch, CURLOPT_HEADER, 0);
-//        curl_setopt($ch, CURLOPT_URL, $url);
-//        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-//        $response = curl_exec($ch);
-//        curl_close($ch);
-//
-//        return $response;
-//    }
-	protected function queryShortener($url) {
-		if (strstr($url, "click")) {
-			$resp = '{"status_code": 200,';
-			$resp .= '"data": {';
-			$resp .= '"clicks": [';
-			$resp .= '{';
-			$resp .= '"user_clicks": 22,';
-			$resp .= '"global_clicks": 150';
-			$resp .= '}';
-			$resp .= ']';
-			$resp .= '}';
-			$resp .= '}';
-		} else {
-			$resp = '{"status_code": 200,';
-			$resp .= '"data": {';
-			$resp .= '"hash": "'. substr(md5(time()), 0, 8) .'",';
-			$resp .= '"new_hash": 1';
-			$resp .= '}}';
-		}
+    protected function queryShortener($url) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $response = curl_exec($ch);
+        curl_close($ch);
 
-		return $resp;
-	}
+        return $response;
+    }
 }

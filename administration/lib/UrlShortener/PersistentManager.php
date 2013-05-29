@@ -1,17 +1,36 @@
 <?php
 namespace UrlShortener;
 
+/**
+ * Class PersistentManager implements IPersistence interface and store data into MySQL
+ * using mysqli PHP interface.
+ * @package UrlShortener
+ */
 class PersistentManager implements IPersistence {
 	/**
-	 * @var mysqli
+	 * connection object
+	 * @var \mysqli
 	 */
-	protected $conn = null; /*mysql connection*/
+	protected $conn = null;
+
+	/**
+	 * table where Shortener data are stored
+	 * @var string
+	 */
 	protected $table = '';
-	
+
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
 	}
 
-	
+	/**
+	 * This function is delayed constructor. This is because constructor is called during
+	 * application initialization when configuration file is red.
+	 * @param array $init
+	 * @return bool
+	 */
 	public function init($init) {
 		$this->conn = @new \mysqli($init['server'], $init['user'], $init['password'],$init['database']);
 		$this->table = $init['table'];
@@ -23,40 +42,55 @@ class PersistentManager implements IPersistence {
 		}
 		return true;
 	}
-	
+
+	/**
+	 * Method returns all shortened URLs from table
+	 * @return array
+	 */
 	public function getUrlList() {
 		$arr = array();
 
 		if ($stmt = $this->conn->prepare("SELECT idUrlShorten, shortenerHash, originalUrl FROM ".$this->table)) {
 			$stmt->execute();
-			$result = $stmt->get_result();
 
-			while($row = $result->fetch_assoc()) {
-				$arr[] = $row;
+			$stmt->bind_result($id, $shorten, $url);
+			while($stmt->fetch()) {
+				$arr[] = array("hash" => $id, "shortenHash" => $shorten, "url" => $url);
 			}
-			$result->free();
+
 			$stmt->close();
 		}
 		return $arr;
 	}
-	
+
+	/**
+	 * Method checks if given string is unique compared to stored hashes.
+	 * @param string $hash
+	 * @return bool
+	 */
 	public function checkUniqueHash($hash) {
 		$ret = false;
 		$hash = $this->conn->real_escape_string($hash);
-		if ($stmt = $this->conn->prepare("SELECT idUrlShorten FROM $this->table WHERE idUrlShorten = ?")) {
+		if ($stmt = $this->conn->prepare("SELECT idUrlShorten FROM ".$this->table." WHERE idUrlShorten = ?")) {
 			$stmt->bind_param("s", $hash);
 			$stmt->execute();
-			$result = $stmt->get_result();
 
-			/*@var $result mysqli_stmt*/
-			$ret = ($result->num_rows == 0);
+			// Is there better way to get information if there is result?
+			$stmt->bind_result($id);
+			$ret = !$stmt->fetch();
 
-			$result->free();
 			$stmt->close();
 		}
 		return $ret;
 	}
-	
+
+	/**
+	 * Saves given URL and hashes into database. If $hash is ommited than new with 8 characters would be generated.
+	 * @param string $url
+	 * @param string $shortenerHash
+	 * @param string $hash
+	 * @return array|bool
+	 */
 	public function saveUrl($url, $shortenerHash, $hash) {
 		$ret = false;
 		$url = $this->conn->real_escape_string($url);//PDO::quote($url);
@@ -73,58 +107,74 @@ class PersistentManager implements IPersistence {
 			$stmt->free_result();
 		}
 
+		// Tests that information were stored, because there is no row ID yet.
 		if ($stmt = $this->conn->prepare("SELECT idUrlShorten AS hash, originalUrl AS url FROM ".$this->table." WHERE idUrlShorten = ?")){
 			$stmt->bind_param("s", $hash);
 			$stmt->execute();
-			$result = $stmt->get_result();
-			if( $result->num_rows == 1) {
-				$ret = $result->fetch_assoc();
+
+			$stmt->bind_result($hash, $url);
+			if($stmt->fetch()) {
+				$ret = array("hash" => $hash, "url" => $url);
 			}
-			$result->free();
 			$stmt->close();
 		}
 
 		return $ret;
 	}
-	
-	public function getUrlByShortenerHash($hash) {
+
+	/**
+	 * Returns URL information for given shortener hash.
+	 * @param string $shortenerHash
+	 * @return array|bool
+	 */
+	public function getUrlByShortenerHash($shortenerHash) {
+		$ret = false;
+		$shortenerHash = $this->conn->real_escape_string($shortenerHash);
+		if ($stmt = $this->conn->prepare("SELECT idUrlShorten AS hash, originalUrl AS url FROM ".$this->table." WHERE shortenerHash = ?")){
+			$stmt->bind_param("s", $shortenerHash);
+			$stmt->execute();
+			$stmt->bind_result($hash, $url);
+			if ($stmt->fetch()) {
+				$ret = array("hash" => $hash, "url" => $url);
+			}
+
+			$stmt->close();
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * Returns URL information for given local hash.
+	 * @param string $hash
+	 * @return array|bool
+	 */
+	public function getUrlByHash($hash) {
 		$ret = false;
 		$hash = $this->conn->real_escape_string($hash);
-		if ($stmt = $this->conn->prepare("SELECT idUrlShorten AS hash, originalUrl AS url FROM $this->table WHERE shortenerHash = ?")){
+		if ($stmt = $this->conn->prepare("SELECT idUrlShorten AS hash, originalUrl AS url, shortenerHash FROM ".$this->table." WHERE idUrlShorten = ?")){
 			$stmt->bind_param("s", $hash);
 			$stmt->execute();
-			$result = $stmt->get_result();
-			if( $result->num_rows == 1) {
-				$ret = $result->fetch_assoc();
+			$stmt->bind_result($hash, $url, $shortenerHash);
+			if($stmt->fetch()) {
+				$ret = array("hash" => $hash, "url" => $url, "shortenerHash" => $shortenerHash);
 			}
-			$result->free();  //??possible
+
 			$stmt->close();
 		}
 
 		return $ret;
 	}
 
-    public function getUrlByHash($hash) {
-		$ret = false;
-		$hash = $this->conn->real_escape_string($hash);
-		if ($stmt = $this->conn->prepare("SELECT idUrlShorten AS hash, originalUrl AS url, shortenerHash FROM $this->table WHERE idUrlShorten = ?")){
-			$stmt->bind_param("s", $hash);
-			$stmt->execute();
-			$result = $stmt->get_result();
-			if( $result->num_rows == 1) {
-				$ret = $result->fetch_assoc();
-			}
-			$result->free();  //??possible
-			$stmt->close();
-		}
-
-		return $ret;
-	}
-	
+	/**
+	 * Deletes URL information from database.
+	 * @param string $hash
+	 * @return bool
+	 */
 	public function deleteLink($hash) {
 		$ret = false;
 		$hash = $this->conn->real_escape_string($hash);
-		if ($stmt = $this->conn->prepare("DELETE FROM $this->table WHERE idUrlShorten = ? LIMIT 1")){
+		if ($stmt = $this->conn->prepare("DELETE FROM ".$this->table." WHERE idUrlShorten = ? LIMIT 1")){
 			$stmt->bind_param("s", $hash);
 			$stmt->execute();
 			$ret = ($stmt->affected_rows == 1);

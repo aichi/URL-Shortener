@@ -32,7 +32,7 @@
 		/**
 		 * Mandatory property defined in Module interface
 		 * @public
-		 * @type {String}
+		 * @type String
 		 * @name UrlShortener.NewUrl#name
 		 */
 		//defined in constructor()
@@ -45,13 +45,13 @@
 
 		/**
 		 * Stored parent container given by attach method
-		 * @type {HTMLElement}
+		 * @type HTMLElement
 		 */
 		_parentNode: null,
 
 		/**
 		 * Reference to visible box (new url form)
-		 * @type {HTMLElement}
+		 * @type HTMLElement
 		 */
 		_showedBox: null,
 
